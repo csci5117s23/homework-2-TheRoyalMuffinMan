@@ -12,7 +12,7 @@ import { AddIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import Category from "./Category";
 
-export default function Menu({ categories, setCategories, selected }) {
+export default function Menu({ categories, setCategories }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [category, setCategory] = useState('');
     const router = useRouter();
@@ -24,6 +24,13 @@ export default function Menu({ categories, setCategories, selected }) {
     }
     const isError = category === '' || checkCategory(category);
     useEffect(() => { !isOpen && setCategory('') }, [isOpen]);
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        setCategories(oldList => [...oldList, category]);
+        // Logic to add to DB
+        onClose();
+    }
 
     return (
         <Flex
@@ -78,7 +85,7 @@ export default function Menu({ categories, setCategories, selected }) {
                         justifyContent="space-between"
                     >
                         <Button
-                            onClick={onClose}
+                            onClick={handleSubmit}
                             color="#FCD6CC"
                             background="#323C4D"
                             filter="brightness(1)"
@@ -117,7 +124,7 @@ export default function Menu({ categories, setCategories, selected }) {
             >
                 All Categories
             </Link>
-            {categories.map(cat => <Category key={cat} category={cat} selected={selected} />)}
+            {categories.map(cat => <Category key={cat} category={cat} />)}
         </Flex>
     );
 }
