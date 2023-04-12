@@ -1,6 +1,6 @@
-import { app } from 'codehooks-js';
-import { crudlify } from 'codehooks-crudlify';
-import { object, string, boolean, array } from 'yup';
+import { app } from "codehooks-js";
+import { crudlify } from "codehooks-crudlify";
+import { object, string, boolean, array } from "yup";
 
 // Use Crudlify to create a REST API for any collection
 const TodoItem = object({

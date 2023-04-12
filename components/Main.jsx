@@ -30,7 +30,7 @@ export default function Main({ category, view }) {
             setTodos(data.filter(cat => cat.categories.includes(category) && cat.state === view));
         }
         validateData();
-    }, []);
+    }, [category, view]);
 
 
     const timeout = delay => {
