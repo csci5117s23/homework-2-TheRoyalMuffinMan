@@ -4,7 +4,7 @@ import {
     Modal, ModalOverlay,
     ModalContent, ModalHeader,
     ModalFooter, ModalBody,
-    ModalCloseButton, FormControl,
+    ModalCloseButton, FormControl, Spinner,
     FormLabel, FormErrorMessage, useDisclosure
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
@@ -12,24 +12,70 @@ import { AddIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import Category from "./Category";
 
-export default function Menu({ categories, setCategories }) {
+export default function Menu({ categories, setCategories = undefined }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState("");
+    const [menuCategories, setMenuCategories] = useState(undefined);
     const router = useRouter();
     const checkCategory = cat => {
         cat = cat.trim();
         cat = cat.toLowerCase();
-        cat = cat.replace(/\s+/g, '-');
+        cat = cat.replace(/\s+/g, "-");
         return categories.includes(cat) || cat === "all-categories";
     }
-    const isError = category === '' || checkCategory(category);
-    useEffect(() => { !isOpen && setCategory('') }, [isOpen]);
+    const isError = category === "" || checkCategory(category);
+    useEffect(() => { !isOpen && setCategory("") }, [isOpen]);
 
-    const handleSubmit = e => {
-        e.preventDefault();
-        setCategories(oldList => [...oldList, category]);
-        // Logic to add to DB
+    useEffect(() => {
+        const getCategories = async () => {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/categories", {
+                method: "GET",
+                headers: {
+                    "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                }
+            });
+            
+            const data = await response.json();
+            setMenuCategories(Object.values(data));
+        }
+        getCategories();
+    }, []);
+
+    const addCategory = async e => {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/categories", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+            },
+            body: JSON.stringify({ category: category })
+        });
+        const result = await response.json();
+        setMenuCategories(oldList => [...oldList, result]);
+        if (setCategories !== undefined) {
+            setCategories(oldList => [...oldList, result.category]);
+        }
         onClose();
+    }
+
+    if (menuCategories === undefined) {
+        return (
+            <Flex
+                background="#FFFFFF"
+                justify="center"
+                align="center"
+                flex="1"
+            >
+                <Spinner
+                    thickness="12px"
+                    speed="0.75s"
+                    emptyColor="gray.200"
+                    color="#323C4D"
+                    boxSize="250px"
+                />
+            </Flex>
+        );
     }
 
     return (
@@ -44,7 +90,7 @@ export default function Menu({ categories, setCategories }) {
                 color="#FCD6CC"
                 gap="1rem"
                 cursor="pointer"
-                onClick={_ => router.push('/')}
+                onClick={_ => router.push("/")}
             >
                 <Image 
                     height="2rem" 
@@ -85,7 +131,7 @@ export default function Menu({ categories, setCategories }) {
                         justifyContent="space-between"
                     >
                         <Button
-                            onClick={handleSubmit}
+                            onClick={addCategory}
                             color="#FCD6CC"
                             background="#323C4D"
                             filter="brightness(1)"
@@ -124,7 +170,14 @@ export default function Menu({ categories, setCategories }) {
             >
                 All Categories
             </Link>
-            {categories.map(cat => <Category key={cat} category={cat} />)}
+            {menuCategories.map(cat => 
+                <Category 
+                    key={cat._id} 
+                    id={cat._id} 
+                    category={cat.category} 
+                    setMenuCategories={setMenuCategories}
+                    setCategories={setCategories}
+                />)}
         </Flex>
     );
 }

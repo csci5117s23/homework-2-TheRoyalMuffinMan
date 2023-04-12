@@ -1,9 +1,12 @@
-import { ChakraProvider, chakra } from '@chakra-ui/react'
-import Head from 'next/head';
-import '@/styles/globals.css';
+import { ChakraProvider, chakra } from "@chakra-ui/react"
+import { ClerkProvider } from "@clerk/nextjs";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import "@/styles/globals.css";
 
 export default function App({ Component, pageProps }) {
     const title = `Todo\u211D`;
+    const router = useRouter();
 
     return (
         <ChakraProvider>
@@ -20,7 +23,7 @@ export default function App({ Component, pageProps }) {
                 minHeight="100vh"
                 bg="#FFFFFF"
             >
-                <Component {...pageProps} />
+                <Component {...pageProps} key={router.asPath}/>
             </chakra.div>
         </ChakraProvider>
     );

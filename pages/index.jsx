@@ -1,5 +1,5 @@
-import { Flex, Image, Heading, Button, keyframes } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
+import { Flex, Image, Heading, Button, keyframes } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
 const rotation = keyframes`
     from {
@@ -37,7 +37,7 @@ export default function Home() {
                     fontSize="4rem"
                     letterSpacing="0.5rem"
                 >
-                    Todo{'\u211D'}
+                    Todo{"\u211D"}
                 </Heading>
             </Flex>
             <Button 

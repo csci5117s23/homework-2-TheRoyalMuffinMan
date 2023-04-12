@@ -6,38 +6,77 @@ import {
     ModalCloseButton, FormControl, Textarea,
     FormLabel, FormErrorMessage, useDisclosure
 } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import TodoItem from "./TodoItem";
 
 export default function Main({ category, view }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [summary, setSummary] = useState('');
+    const [summary, setSummary] = useState("");
     // Make API call based on category and view (not done = false, done = true)
     const [todos, setTodos] = useState([]);
-    const isError = summary === '';
+    const isError = summary === "";
     const router = useRouter();
+    
+    useEffect(() => {
+        const validateData = async () => {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/todoitems", {
+                method: "GET",
+                headers: {
+                    "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                }
+            });
+            const data = await response.json();
+            setTodos(data.filter(cat => cat.categories.includes(category) && cat.state === view));
+        }
+        validateData();
+    }, []);
+
 
     const timeout = delay => {
         return new Promise(res => setTimeout(res, delay));
     }
 
-    const handleSubmit = async e => {
-        e.preventDefault();
-        // Logic to add to DB and return back id to identification
-
-        //                                          PLACE HOLDER
-        setTodos(oldTodos => [{ id: Math.floor(Math.random() * 100000000), summary: summary }, ...oldTodos]);
+    const addItem = async e => {
+        const cats = category === "all-categories" ? [category] : ["all-categories", category]
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/todoitems", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+            },
+            body: JSON.stringify({ summary: summary, categories: cats })
+        });
+        const result = await response.json();
+        setTodos(oldTodos => [result, ...oldTodos]);
         onClose();
     }
 
     const setStatusOnTodoItem = async (id, state) => {
-        const todoItem = todos.find(todo => todo.id === id);
-        console.log(todoItem);
+        await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + `/todoitems/${id}`, {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+            },
+            body: JSON.stringify({ state: state }) 
+        });
 
-        // Logic to change status in DB using {id} and {state}
-        await timeout(1000);
-        setTodos(oldTodos => oldTodos.filter(todo => todo.id !== id));
+        await timeout(500);
+        setTodos(oldTodos => oldTodos.filter(todo => todo._id !== id));
+    }
+
+    const deleteItem = async id => {
+        await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + `/todoitems/${id}`, {
+            method: "DELETE",
+            headers: {
+                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+            }
+        });
+        
+        setTodos(oldTodos => oldTodos.filter(todo => todo._id !== id));
     }
 
     return (
@@ -83,7 +122,7 @@ export default function Main({ category, view }) {
                     fontSize="1.25rem"
                     fontWeight="500"
                 >
-                    {category.replace(/-/g, ' ')}
+                    {category.replace(/-/g, " ")}
                 </Text>
                 <Button
                     fontSize="1rem"
@@ -116,7 +155,7 @@ export default function Main({ category, view }) {
                             justifyContent="space-between"
                         >
                             <Button
-                                onClick={handleSubmit}
+                                onClick={addItem}
                                 color="#FCD6CC"
                                 background="#323C4D"
                                 filter="brightness(1)"
@@ -131,11 +170,12 @@ export default function Main({ category, view }) {
             {todos.map(todo => {
                 return (
                     <TodoItem 
-                        key={todo.id} 
-                        id={todo.id} 
-                        summary={todo.summary} 
+                        key={todo._id} 
+                        id={todo._id} 
+                        summary={todo.summary}
                         view={view}
                         setStatusOnTodoItem={setStatusOnTodoItem}
+                        deleteItem={deleteItem}
                     />
                 )})
             }

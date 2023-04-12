@@ -1,14 +1,26 @@
-import { Button, Flex, Link } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { Flex, Link } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
+import { useRouter } from "next/router";
 
-export default function Category({ category }) {
+export default function Category({ id, category, setMenuCategories, setCategories = undefined }) {
     const router = useRouter();
 
-    const deleteCategory = e => {
+    const deleteCategory = async e => {
         e.preventDefault();
-        // Logic to delete from DB
-        router.push("/todos/all-categories")
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + `/categories/${id}`, { 
+            method: "DELETE",
+            headers: {
+                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+            }
+        });
+        const result = await response.json();
+        setMenuCategories(list => list.filter(item => item._id !== result._id));
+        if (setCategories !== undefined) {
+            setCategories(list => list.filter(item => item.category !== result.category));
+        }
+        if (decodeURIComponent(router.asPath).indexOf(category) !== -1) {
+            router.push("/todos/all-categories");
+        }
     }
 
     return (
