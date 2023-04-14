@@ -7,7 +7,7 @@ Please fill out all of the following sections to help us grade your submission:
 
 ## Student (to be completed individually)
 
-* Andrew Hoyle, x500@umn.edu
+* Andrew Hoyle, hoyle020
 
 ## Link to Site
 
@@ -15,6 +15,6 @@ Please fill out all of the following sections to help us grade your submission:
 
 ## Challenge Task
 
-* I started the challenge task: [yes/no]
-* I completed the challenge task: [yes/no]
+* I started the challenge task: [yes]
+* I completed the challenge task: [yes]
 

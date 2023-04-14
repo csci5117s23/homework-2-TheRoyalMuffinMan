@@ -32,11 +32,11 @@ export default function TodoView({ id, authToken, categories }) {
                 }
             });
 
-            const result = await response.json();
-            if (result == null || result.length === 0) {
+            if (response.status !== 200) {
                 router.push("/404"); return;
             }
 
+            const result = await response.json();
             const res_cats = result.categories;
             const res_summary = result.summary;
             const res_state = result.state;
