@@ -1,10 +1,15 @@
-import { Flex, Spinner } from "@chakra-ui/react";
+import TodoList from "@/components/TodoList";
 import { useState, useEffect } from "react";
+import { Flex } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { useAuth } from "@clerk/nextjs";
 import Menu from "@/components/Menu";
-import Main from "@/components/Main";
 
 export default function Todos() {
+    // Auth
+    const { isLoaded, userId, sessionId, getToken } = useAuth();
+    const [authToken, setAuthToken] = useState(undefined);
+
     // API call for all categories
     const [categories, setCategories] = useState(undefined);
     const [category, setCategory] = useState(undefined);
@@ -13,12 +18,19 @@ export default function Todos() {
 
     useEffect(() => {
         if (!router_category) return;
+        if (!isLoaded) return;
 
         const validateData = async () => {
+            if (!userId) {
+                router.push("/");
+                return;
+            }
+
+            const token = await getToken({ template: "codehooks" });
             const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/categories", {
                 method: "GET",
                 headers: {
-                    "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                    "Authorization": "Bearer " + token
                 }
             });
             
@@ -29,30 +41,12 @@ export default function Todos() {
             } else {
                 router.push("/404");
             }
-
+            
             setCategories(cat_entries);
+            setAuthToken(token);
         }
         validateData();
-    }, [router_category, router]);
-
-    if (category === undefined || categories === undefined) {
-        return (
-            <Flex
-                background="#FFFFFF"
-                justify="center"
-                align="center"
-                flex="1"
-            >
-                <Spinner
-                    thickness="12px"
-                    speed="0.75s"
-                    emptyColor="gray.200"
-                    color="#323C4D"
-                    boxSize="250px"
-                />
-            </Flex>
-        );
-    }
+    }, [router_category, router, isLoaded, userId, getToken]);
 
     return (
         <Flex
@@ -61,9 +55,11 @@ export default function Todos() {
         >
             <Menu 
                 categories={categories}
+                authToken={authToken}
             />
-            <Main 
+            <TodoList 
                 category={category}
+                authToken={authToken}
                 view={false}
             />
         </Flex>

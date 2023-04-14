@@ -2,7 +2,7 @@ import { Flex, Link } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 
-export default function Category({ id, category, setMenuCategories, setCategories = undefined }) {
+export default function Category({ id, category, setMenuCategories, authToken, setCategories = undefined }) {
     const router = useRouter();
 
     const deleteCategory = async e => {
@@ -10,13 +10,13 @@ export default function Category({ id, category, setMenuCategories, setCategorie
         const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + `/categories/${id}`, { 
             method: "DELETE",
             headers: {
-                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                "Authorization": "Bearer " + authToken
             }
         });
         const result = await response.json();
         setMenuCategories(list => list.filter(item => item._id !== result._id));
         if (setCategories !== undefined) {
-            setCategories(list => list.filter(item => item.category !== result.category));
+            setCategories(list => list.filter(cat => cat !== category));
         }
         if (decodeURIComponent(router.asPath).indexOf(category) !== -1) {
             router.push("/todos/all-categories");
@@ -59,6 +59,8 @@ export default function Category({ id, category, setMenuCategories, setCategorie
                 onClick={deleteCategory} 
                 color="#FCD6CC"
                 cursor="pointer"
+                filter="brightness(1)"
+                _hover={{ filter: "brightness(0.75)" }}
             />
         </Flex>
     );

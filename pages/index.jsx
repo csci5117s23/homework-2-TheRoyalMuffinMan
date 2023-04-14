@@ -1,5 +1,7 @@
 import { Flex, Image, Heading, Button, keyframes } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 const rotation = keyframes`
     from {
@@ -11,7 +13,18 @@ const rotation = keyframes`
 `;
 
 export default function Home() {
+    const { isLoaded, userId, sessionId, getToken } = useAuth(); 
     const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoaded) return;
+        const process = async() => {
+            if (userId) {
+                router.push("/todos/all-categories");
+            }
+        }
+        process();
+    }, [isLoaded, userId, router]);
 
     return (
         <Flex
@@ -41,7 +54,7 @@ export default function Home() {
                 </Heading>
             </Flex>
             <Button 
-                onClick={_ => router.push("/login")}
+                onClick={_ => router.push("/sign-in")}
                 letterSpacing="0.5rem"
                 fontSize="2.5rem"
                 color="#323C4D"

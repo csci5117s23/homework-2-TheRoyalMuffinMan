@@ -9,8 +9,9 @@ import {
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import TodoItem from "./TodoItem";
+import Loading from "./Loading";
 
-export default function Main({ category, view }) {
+export default function TodoList({ category, authToken, view }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [summary, setSummary] = useState("");
     // Make API call based on category and view (not done = false, done = true)
@@ -19,18 +20,21 @@ export default function Main({ category, view }) {
     const router = useRouter();
     
     useEffect(() => {
+        if (!category) return;
+        if (!authToken) return;
+        
         const validateData = async () => {
             const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/todoitems", {
                 method: "GET",
                 headers: {
-                    "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                    "Authorization": "Bearer " + authToken
                 }
             });
             const data = await response.json();
             setTodos(data.filter(cat => cat.categories.includes(category) && cat.state === view));
         }
         validateData();
-    }, [category, view]);
+    }, [category, view, authToken]);
 
 
     const timeout = delay => {
@@ -44,12 +48,13 @@ export default function Main({ category, view }) {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({ summary: summary, categories: cats })
         });
         const result = await response.json();
         setTodos(oldTodos => [result, ...oldTodos]);
+        setSummary("");
         onClose();
     }
 
@@ -59,7 +64,7 @@ export default function Main({ category, view }) {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({ state: state }) 
         });
@@ -72,11 +77,15 @@ export default function Main({ category, view }) {
         await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + `/todoitems/${id}`, {
             method: "DELETE",
             headers: {
-                "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                "Authorization": "Bearer " + authToken
             }
         });
         
         setTodos(oldTodos => oldTodos.filter(todo => todo._id !== id));
+    }
+
+    if (todos === undefined || category === undefined || authToken === undefined) {
+        return <Loading />;
     }
 
     return (

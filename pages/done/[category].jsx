@@ -1,10 +1,15 @@
 import { Flex, Spinner } from "@chakra-ui/react";
+import TodoList from "@/components/TodoList";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useAuth } from "@clerk/nextjs";
 import Menu from "@/components/Menu";
-import Main from "@/components/Main";
 
 export default function Done() {
+    // Auth
+    const { isLoaded, userId, sessionId, getToken } = useAuth();
+    const [authToken, setAuthToken] = useState(undefined);
+
     // API call for all categories
     const [categories, setCategories] = useState(undefined);
     const [category, setCategory] = useState(undefined);
@@ -13,12 +18,19 @@ export default function Done() {
 
     useEffect(() => {
         if (!router_category) return;
+        if (!isLoaded) return;
 
         const validateData = async () => {
+            if (!userId) {
+                router.push("/");
+                return;
+            }
+
+            const token = await getToken({ template: "codehooks" });
             const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT + "/categories", {
                 method: "GET",
                 headers: {
-                    "x-apikey": process.env.NEXT_PUBLIC_API_KEY
+                    "Authorization": "Bearer " + token
                 }
             });
             
@@ -31,11 +43,12 @@ export default function Done() {
             }
 
             setCategories(cat_entries);
+            setAuthToken(token);
         }
         validateData();
-    }, [router_category, router]);
+    }, [router_category, router, userId, isLoaded, getToken]);
 
-    if (category === undefined || categories === undefined) {
+    if (category === undefined || categories === undefined || authToken === undefined) {
         return (
             <Flex
                 background="#FFFFFF"
@@ -61,9 +74,11 @@ export default function Done() {
         >
             <Menu 
                 categories={categories}
+                authToken={authToken}
             />
-            <Main 
+            <TodoList 
                 category={category}
+                authToken={authToken}
                 view={true}
             />
         </Flex>
