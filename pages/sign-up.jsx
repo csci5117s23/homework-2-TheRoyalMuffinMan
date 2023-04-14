@@ -9,12 +9,7 @@ export default function SignUpPage() {
             flex="1"
             background="#eee"
         >
-            <SignUp 
-                path="/sign-up"
-                routing="path" 
-                signUpUrl="/sign-in" 
-                redirectUrl="/todos/all-categories" 
-            />
+            <SignUp />
         </Flex>
     );
 }
