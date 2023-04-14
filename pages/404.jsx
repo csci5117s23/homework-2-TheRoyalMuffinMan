@@ -11,7 +11,7 @@ export default function NotFound() {
             gap="2rem"
             justify="center"
             align="center"
-            background="linear-gradient(180deg, #323C4D, #171515);"
+            background="linear-gradient(180deg, #323C4D, #171515)"
         >
             <Flex
                 align="center"

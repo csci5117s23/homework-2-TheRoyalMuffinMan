@@ -47,26 +47,7 @@ export default function Done() {
         }
         validateData();
     }, [router_category, router, userId, isLoaded, getToken]);
-
-    if (category === undefined || categories === undefined || authToken === undefined) {
-        return (
-            <Flex
-                background="#FFFFFF"
-                justify="center"
-                align="center"
-                flex="1"
-            >
-                <Spinner
-                    thickness="12px"
-                    speed="0.75s"
-                    emptyColor="gray.200"
-                    color="#323C4D"
-                    boxSize="250px"
-                />
-            </Flex>
-        );
-    }
-
+    
     return (
         <Flex
             flex="1"
