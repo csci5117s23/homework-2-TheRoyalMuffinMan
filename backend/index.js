@@ -1,6 +1,6 @@
 import { app } from "codehooks-js";
 import { crudlify } from "codehooks-crudlify";
-import { object, string, boolean, array } from "yup";
+import { object, string, boolean, array, date } from "yup";
 import jwtDecode from "jwt-decode";
 
 // TodoItem REST API
@@ -8,7 +8,8 @@ const TodoItem = object({
     summary: string().required(),
     state: boolean().required().default(() => false),
     categories: array().of(string()).required(),
-    userId: string().required()
+    userId: string().required(),
+    created: date().default(() => new Date()),
 });
 
 // Categories REST API

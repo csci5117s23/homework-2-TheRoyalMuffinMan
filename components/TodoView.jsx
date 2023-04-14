@@ -15,6 +15,7 @@ export default function TodoView({ id, authToken, categories }) {
     const [todoCategories, setTodoCategories] = useState(undefined);
     const [checkStatus, setCheckStatus] = useState(undefined);
     const [summary, setSummary] = useState(undefined);
+    const [created, setCreated] = useState(undefined);
     const { isOpen, onToggle } = useDisclosure();
     const router = useRouter();
 
@@ -39,6 +40,7 @@ export default function TodoView({ id, authToken, categories }) {
             const res_cats = result.categories;
             const res_summary = result.summary;
             const res_state = result.state;
+            const res_created = result.created;
             const cats = res_cats.filter(cat => categories.includes(cat));
 
             cats.unshift("all-categories");
@@ -51,13 +53,14 @@ export default function TodoView({ id, authToken, categories }) {
                         "Content-Type": "application/json",
                         "Authorization": "Bearer " + authToken
                     },
-                    body: JSON.stringify({ _id: id, summary: res_summary, state: res_state, categories: cats}) 
+                    body: JSON.stringify({ _id: id, summary: res_summary, state: res_state, categories: cats, created: res_created}) 
                 });
             }
 
             setSummary(res_summary);
             setTodoCategories(cats);
             setCheckStatus(res_state);
+            setCreated(res_created);
         }
 
         retrieveData();
@@ -86,7 +89,7 @@ export default function TodoView({ id, authToken, categories }) {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + authToken
             },
-            body: JSON.stringify({ _id: id, summary: summary, state: checkStatus, categories: todoCategories}) 
+            body: JSON.stringify({ _id: id, summary: summary, state: checkStatus, categories: todoCategories, created: created }) 
         });
         onToggle();
     }
@@ -103,7 +106,7 @@ export default function TodoView({ id, authToken, categories }) {
         return (
             id === undefined || authToken === undefined ||
             categories === undefined || todoCategories === undefined ||
-            summary === undefined || checkStatus === undefined
+            created === undefined || summary === undefined || checkStatus === undefined
         );
     }
 

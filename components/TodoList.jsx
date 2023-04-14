@@ -15,7 +15,7 @@ export default function TodoList({ category, authToken, view }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [summary, setSummary] = useState("");
     // Make API call based on category and view (not done = false, done = true)
-    const [todos, setTodos] = useState([]);
+    const [todos, setTodos] = useState(undefined);
     const isError = summary === "";
     const router = useRouter();
     
@@ -31,7 +31,8 @@ export default function TodoList({ category, authToken, view }) {
                 }
             });
             const data = await response.json();
-            setTodos(data.filter(cat => cat.categories.includes(category) && cat.state === view));
+            const retrieved_todos = data.filter(cat => cat.categories.includes(category) && cat.state === view);
+            setTodos(retrieved_todos.sort((a, b) => new Date(b.created) - new Date(a.created)));
         }
         validateData();
     }, [category, view, authToken]);
